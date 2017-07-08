@@ -3,7 +3,7 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {    
     private boolean[][] fopen;
     private int opencount, up;
-    private static WeightedQuickUnionUF uf;
+    private WeightedQuickUnionUF uf;
     public Percolation(int n) {       
         if(n<=0)
             throw new IllegalArgumentException();        
@@ -21,28 +21,11 @@ public class Percolation {
     }
 
     public void open(int row, int col) {
-        int n = fopen[0].length;
-        if(row < 1  || row > n || col < 1 || col > n)
+        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
             throw new IllegalArgumentException();
         
         if(isOpen(row, col))
             return;
-        
-        opencount++;
-        fopen[row-1][col-1] = true;
-    }
-    public boolean isOpen(int row, int col) {
-        int n = fopen[0].length;
-        if(row < 1  || row > n || col < 1 || col > n)
-            throw new IllegalArgumentException();
-        return fopen[row-1][col-1];
-    }
-    public boolean isFull(int row, int col) {
-        int n = fopen[0].length;
-        if(row < 1  || row > n || col < 1 || col > n)
-            throw new IllegalArgumentException();       
-        if(!isOpen(row, col))
-            return false;
         int n = fopen[0].length;
         int nowc = (row-1) * n + col - 1;
         //上
@@ -70,6 +53,20 @@ public class Percolation {
                 uf.union(nowc, rightc);
             }
         }
+        opencount++;
+        fopen[row-1][col-1] = true;
+    }
+    public boolean isOpen(int row, int col) {
+        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
+            throw new IllegalArgumentException();
+        return fopen[row-1][col-1];
+    }
+    public boolean isFull(int row, int col) {
+        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
+            throw new IllegalArgumentException();       
+        if(!isOpen(row, col))
+            return false;
+        int nowc = (row-1) * fopen[0].length + col - 1;
         return uf.connected(nowc, up);
     }
     public int numberOfOpenSites() {

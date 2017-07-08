@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class PercolationStats {
   
-    private static double[] x;
+    private double[] x;
     private static int n;
     private static int trials;
   
