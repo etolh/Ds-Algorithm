@@ -3,66 +3,67 @@ import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.StdOut;
 
 public class PercolationStats {
-  
-    private double[] x;
-    private static int n;
-    private static int trials;
-  
-    public PercolationStats(int n, int trials){
-        
-        if(n <= 0 || trials <= 0)
+
+    private final double[] x;
+
+    public PercolationStats(int n, int trials) {
+
+        if (n <= 0 || trials <= 0)
             throw new IllegalArgumentException();
         x = new double[trials];
-        
-        for(int i = 0; i < trials; i++){
-            
+
+        for (int i = 0; i < trials; i++) {
+
             Percolation p = new Percolation(n);
-            boolean flag = false;
-            
-            while(true){
-                int rrow = StdRandom.uniform(1,n+1);
-                int rcol = StdRandom.uniform(1,n+1);          
-                
-                if(!p.isOpen(rrow, rcol))
+
+            while (true) {
+
+                int rrow = StdRandom.uniform(1, n + 1);
+                int rcol = StdRandom.uniform(1, n + 1);
+
+                if (!p.isOpen(rrow, rcol))
                     p.open(rrow, rcol);
-                
-                if(p.isFull(rrow, rcol)){
-                    if(p.percolates()){
-                        flag = true;
+
+                if (p.isFull(rrow, rcol)) {
+                    if (p.percolates()) {
                         break;
                     }
                 }
-            }        
+            }
             int opensites = p.numberOfOpenSites();
-            x[i] = (double)opensites / (n * n); 
+            x[i] = (double) opensites / (n * n);
         }
     }
-    
-    public double mean(){
+
+    public double mean() {
         return StdStats.mean(x);
     }
 
-    public double stddev(){
+    public double stddev() {
         return StdStats.stddev(x);
     }
-    
-    public double confidenceLo(){
+
+    public double confidenceLo() {
         double avgx = mean();
-        double s = Math.sqrt(stddev());
-        return avgx - 1.96 * s / Math.sqrt(trials);
+        double s = stddev();
+        return (avgx - 1.96 * s / Math.sqrt(x.length));
     }
-    public double confidenceHi(){
+
+    public double confidenceHi() {
         double avgx = mean();
-        double s = Math.sqrt(stddev());
-        return avgx + 1.96 * s / Math.sqrt(trials);
+        double s = stddev();
+        return avgx + 1.96 * s / Math.sqrt(x.length);
     }
-    public static void main(String[] args){
-        n = Integer.parseInt(args[0]);
-        trials = Integer.parseInt(args[1]);
-        
+
+    public static void main(String[] args) {
+
+        int n = Integer.parseInt(args[0]);
+        int trials = Integer.parseInt(args[1]);
+
         PercolationStats ps = new PercolationStats(n, trials);
         StdOut.printf("mean                    = %f\n", ps.mean());
         StdOut.printf("stddev                  = %f\n", ps.stddev());
-        StdOut.printf("95%% confidence interval = [%f, %f]",ps.confidenceLo(), ps.confidenceHi());
+        StdOut.printf("95%% confidence interval = [%f, %f]", ps.confidenceLo(),
+                ps.confidenceHi());
     }
 }

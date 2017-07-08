@@ -1,82 +1,102 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
-public class Percolation {    
+public class Percolation {
+
     private boolean[][] fopen;
-    private int opencount, up;
-    private WeightedQuickUnionUF uf;
-    public Percolation(int n) {       
-        if(n<=0)
-            throw new IllegalArgumentException();        
+    private int opencount;
+    private final int up;
+    private final WeightedQuickUnionUF uf;
+
+    public Percolation(int n) {
+        if (n <= 0)
+            throw new IllegalArgumentException();
         int count = n * n;
         opencount = 0;
         fopen = new boolean[n][n];
         uf = new WeightedQuickUnionUF(count);
         up = 0;
-        for(int i = 0; i < n; i++){
+
+        for (int i = 0; i < n; i++) {
             uf.union(up, i);
-        }        
-        for(int i = 0; i < n; i++)
-            for(int j = 0; j < n; j++)
-            fopen[i][j] = false;
+        }
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                fopen[i][j] = false;
+
     }
 
     public void open(int row, int col) {
-        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
+
+        if (row < 1 || row > fopen[0].length || col < 1 || col > fopen[0].length)
             throw new IllegalArgumentException();
-        
-        if(isOpen(row, col))
+
+        if (isOpen(row, col))
             return;
         int n = fopen[0].length;
-        int nowc = (row-1) * n + col - 1;
-        //上
-        if(row > 1){
+        int nowc = (row - 1) * n + col - 1;
+        // 上
+        if (row > 1) {
             int upc = nowc - n;
-            if(isOpen(row-1, col)){
+            if (isOpen(row - 1, col)) {
                 uf.union(nowc, upc);
             }
         }
-        if(row < n){
+        if (row < n) {
             int downc = nowc + n;
-            if(isOpen(row+1, col)){
+            if (isOpen(row + 1, col)) {
                 uf.union(nowc, downc);
             }
-        }        
-        if(col > 1){
+        }
+        if (col > 1) {
             int leftc = nowc - 1;
-            if(isOpen(row, col-1)){
+            if (isOpen(row, col - 1)) {
                 uf.union(nowc, leftc);
             }
-        }       
-        if(col < n){
+        }
+        if (col < n) {
             int rightc = nowc + 1;
-            if(isOpen(row, col+1)){
+            if (isOpen(row, col + 1)) {
                 uf.union(nowc, rightc);
             }
         }
+
         opencount++;
-        fopen[row-1][col-1] = true;
+        fopen[row - 1][col - 1] = true;
     }
+
+
     public boolean isOpen(int row, int col) {
-        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
+
+        if (row < 1 || row > fopen[0].length || col < 1 || col > fopen[0].length)
             throw new IllegalArgumentException();
-        return fopen[row-1][col-1];
+        return fopen[row - 1][col - 1];
     }
+
+
     public boolean isFull(int row, int col) {
-        if(row < 1  || row > fopen[0].length || col < 1 || col > fopen[0].length)
-            throw new IllegalArgumentException();       
-        if(!isOpen(row, col))
+
+        if (row < 1 || row > fopen[0].length || col < 1 || col > fopen[0].length)
+            throw new IllegalArgumentException();
+
+        if (!isOpen(row, col))
             return false;
-        int nowc = (row-1) * fopen[0].length + col - 1;
+
+        int nowc = (row - 1) * fopen[0].length + col - 1;
         return uf.connected(nowc, up);
     }
+
     public int numberOfOpenSites() {
         return opencount;
     }
+
     public boolean percolates() {
-        int n = fopen[0].length;       
-        for(int i = n * n - 1; i >= n*n - n; i--)
-            if(uf.connected(i, up))
-                return true;     
+        int n = fopen[0].length;
+        if (n == 1)
+            return isOpen(1, 1);
+        for (int i = n * n - 1; i >= n * n - n; i--)
+            if (uf.connected(i, 0))
+                return true;
         return false;
-    }   
+    }
 }
