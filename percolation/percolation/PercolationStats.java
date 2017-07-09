@@ -5,10 +5,10 @@ import edu.princeton.cs.algs4.StdOut;
 public class PercolationStats {
 
     // record every experiments' number
-    private double[] x;
-    private int trials;
-    private double avgx;
-    private double s;
+    private final double[] x;
+    private final int trials;
+    private final double avgx;
+    private final double s;
 
     // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int trials) {
