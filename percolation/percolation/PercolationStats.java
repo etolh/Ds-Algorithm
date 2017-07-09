@@ -4,57 +4,69 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class PercolationStats {
 
-    private final double[] x;
+    // record every experiments' number
+    private double[] x;
+    private int trials;
+    private double avgx;
+    private double s;
 
+    // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int trials) {
 
         if (n <= 0 || trials <= 0)
             throw new IllegalArgumentException();
+        // 初始化
         x = new double[trials];
+        this.trials = trials;
 
+        // 进行trials实验，收集数据
         for (int i = 0; i < trials; i++) {
 
             Percolation p = new Percolation(n);
 
             while (true) {
 
+                // 读取随机数 1~n
                 int rrow = StdRandom.uniform(1, n + 1);
                 int rcol = StdRandom.uniform(1, n + 1);
 
                 if (!p.isOpen(rrow, rcol))
                     p.open(rrow, rcol);
 
-                if (p.isFull(rrow, rcol)) {
-                    if (p.percolates()) {
-                        break;
-                    }
-                }
+                if (p.percolates())
+                    break;
+
             }
             int opensites = p.numberOfOpenSites();
             x[i] = (double) opensites / (n * n);
         }
+
+        // 初始化，只调用一次
+        this.avgx = StdStats.mean(x);
+        this.s = StdStats.stddev(x);
     }
 
+    // sample mean of percolation threshold
     public double mean() {
-        return StdStats.mean(x);
+        return this.avgx;
     }
 
+    // sample standard deviation of percolation threshold
     public double stddev() {
-        return StdStats.stddev(x);
+        return this.s;
     }
 
+    // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        double avgx = mean();
-        double s = stddev();
-        return (avgx - 1.96 * s / Math.sqrt(x.length));
+        return avgx - 1.96 * s / Math.sqrt(trials);
     }
 
+    // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        double avgx = mean();
-        double s = stddev();
-        return avgx + 1.96 * s / Math.sqrt(x.length);
+        return avgx + 1.96 * s / Math.sqrt(trials);
     }
 
+    // test client (described below)
     public static void main(String[] args) {
 
         int n = Integer.parseInt(args[0]);
