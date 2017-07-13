@@ -65,8 +65,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		Item item = a[i];
 		a[i] = null;
 
-		for (int j = i; j < N - 1; j++)
-			a[j] = a[j + 1];
+		a[i] = a[N - 1];
+		a[N - 1] = null;
 
 		N--;
 		if (N > 0 && N == a.length / 4)

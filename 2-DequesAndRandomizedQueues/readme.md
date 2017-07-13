@@ -21,3 +21,5 @@ v1: 要求每次删除一个随机元素，则只能采用数组表示，使用S
 v1: 89--RandomizedQueues测试用例部分失败，原因是dequeue出队时删除元素，将后面元素前移时，先N--导致最后一个元素未能前移。
 
 v2: 96--Permutation部分用例理解错误：Permutation要求是读取标准输入的所有元素，再选出k个元素随机输出
+
+v3：RandomizedQueue的时间空间复杂度：由于不关心顺序，因此删除一个元素时无需进行移动，只需要和最后一个元素替换。bonus:要求Permutation中使用的RandomizedQueues插入的元素不超过k个，需求是必须读取所有的输入，可以StdIn.readAllStrings()读取所有的输入并保存在数组中，使用shuffle生成随机顺序，再读取k个到RandomizedQueues中。
