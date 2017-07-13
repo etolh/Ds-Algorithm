@@ -1,67 +1,12 @@
-###Percolation
-1. 问题：一个有n*n个格子的系统，格子有开闭两种状态（open、block），当一个格子与最上层的格子是相通的，则认为这个格子是满的（full），我们认为如果在最底层存在一个满的格子则该系统是渗透的（percolate），换句话说，即如存在从最上层到最底层的通路，系统渗透。假如一个格子打开的概率是p，存在一种现象，存在一个p*，当p``<``p*时，该系统几乎不渗透；当p``>``p*时，系统几乎总是渗透，分析域值p*
+###Algorithm 4 Pearson
+普林斯顿Algorithm公开课练习题
 
-2. 分析：
-    1. Percolation：设定一个n*n格子的系统，计算当系统渗透时，格子打开的数目得到p*。
-    2. PercolationStats：对Percolation中实验进行若干次独立重复实验，得到p*的期望和方差。
-
-3. 解决思路：
-    1. Percolation设置一个fopen[n][n]二维数组，表示每个格子的开合情况。
-    2. 调用Union-Find模型：若上层和下层存在格子在一个集合中（connect）则表示渗透，主要问题：
-        1. 将二维的格子映射为一维的整数：以0开始，(row-1)*n+col-1
-        2. 若分别对上层、下层格子一一遍历，查找其是否connect，复杂：
-            + 新增2个格子（整数）分别于上层、下层所有格子相连，判断是否存在伤心层格子互连，只需判断新增的两个格子是否互连。
-            + 由于直接调用UF模型，无法将新增的格子包在调用的UF对象中来，因此将新增的上层格子设为第一个格子up=0,下层格子设为down=n^2-1
-            + backwash问题：参见V2
-    3. Percolation API:
-        1. Percolation(n)初始化fopen``[n][n]``和UF对象，并设置up与最上层所有格子互连。
-        2. open(r,c)每打开一个格子，修改fopen，同时判断其上下左右是否存在开发格子，若存在使用uf.union()将其连接。
-        3. isOpen(r,c)：返回fopen
-        4. isFull(r,c)：判断该格子是否与up互连
-        5. percolate()判断底层是否有格子与up连接，若存在，即为渗透，注意n==1，
-    4. PercolationStats则是调用Percolation进行n次独立实验，计算期望和方差。
-
-4. 优化 
-V1: percolation.java中存在行数n无初始化问题，解决方法：使用二维数组fopen[n][n],
-用数组长度保存n。
-
-V2: 当系统渗透后，底部非full的open格子也默认为full，原因是初始化时所有底部格子与down连接，当渗透后，up与down相连接，底部open的格子则为full。
-解决方法：删除底部所有格子与down连接，检查渗透时，检查所有底部格子是否存在一个与up相连。
-
-V3: 在isFull方法中进行连接操作再进行判断，在某一点上单独调用isFull方法可能判断失败，应该将连接操作放在open方法中，打开某个格子，即与上下左右进行连接。
-
-v4: PercolationStats中stddev直接返回标准差s，而非方差s^2；且当n=1时，percolation.java中的percolates方法需要特殊判断，否则默认为渗透状态。
-
-v5: PercolationStats中遍历次数trials直接调用时，存在无初始值问题（静态，默认为0），应该用x[]的长度表示。
-
-v6：解决time和memory问题：多用find,少用union、connect
-1. n在构造函数初始化：不用用fopen[][]数组保存，使用一维数组fopen[]和网格对应的整数对齐，便于通过判断两个整数是否连接对fopen[]进行设值。
-
-2. 使用byte[] fopen来表示格子的状态，0-block,1-open,2-full（集合判断）
-    初始化时设置每个格子的fopen均为0，若fopen[]不为0，则isOpen返回true，
-    
-    当打开某个格子时，若格子在第一行，则设fopen为2，否则设为1；再遍历其上下左右所有的格子，与其中open状态的格子进行连接，且若open状态的格子又为full，即fopen为2，则找到集合的根结点root设fopen[root]=2。
-    -->错误：进行的是集合之间的连接，因始终以集合的根结点进行判断，如打开一个格子，其上（或其他方位）的格子的fopen并不是2，但却是full状态，是由于连接时只是改变集合的根结点fopen为2，自身fopen并没有改变，因此，应该这样判断，若其上的格子是full，也就是说上面格子所属集合fopen[uproot]=2，则将当前格子和上方格子集合连接成的新集合的fopen[root]=2;
-    **注意**：
-    1. 要在未连接前找到上方格子集合的uproot，若连接后，则当前格子的集合已经和上方格子集合连接在一起，其root一样，无法再判断上方格子的状态。
-    2. 若当前格子所属集合fopen[nowroot]=2,而上方格子集合fopen[uproot]=1，将两方集合连接后，新集合的root在上方，则新集合的fopen[root]=1：
-    正确做法：在连接前找到当前集合nowroot和上方集合uproot，若只要有一个集合的fopen为2，则整个新集合的root为2。
-    3. 打开格子的当前集合应该是不断变化的，每连接一次，当前格子的集合变化一次，不应该放在最前面。
-
-
-    isFull：判断某个格子是否为full，不是关注自身的fopen状态，而是关注整个集合的fopen，也就是根结点，若其集合的根结点root的fopen[root]==2，则整个集合的所有结点都是full状态。
-
-v8：空间优化：
-1. PercolationStats中使用变量保存期望和方差，使得只利用一次mean和stddev方法。
-
-2. percolate判断渗透，需要遍历底部所有的格子，判断其是否为full，若是则渗透，能有效地避免backwash问题，但遍历所有格子造成了空间浪费。可以在底下设置一个虚拟bottom，open格子与所有的底部格子相连，但在判断底部格子full问题一定会产生backwash问题。
-反向思维：fopen=2表示与底部的格子相连，建立一个虚拟top与所有的打开的顶部格子相连，判断是否full，只要判断格子（r,c）打开且与top连接，由于底部格子未互连，则不存在backwash问题，而判断percolates只需判断top连接集合的根结点其root是否为2，即与底部相连；open操作则改为：打开格子（r,c）时，只要在顶层即与top相连，在底层则设fopen=2，连接时只要有两个集合有一个root为2，则设新集合的root的fopen为2。
-
-**byte fopen:永远不要底层相连，否则底层open且非full的格子的状态和中间full的格子状态不清，无法进行区分开来，从而存在backwash问题**
-
-5. 总结：
-初始版本使用boolean数组表示
+####Programming Assignments
+1. Percolation
+2. Deque and Randomozed Queues
 
 **注意：**
 1. 标准化API，模型的主要功能应该由模型中的方法完成，可以重复被调用，而不应该需要在Test方法如main中还需要进行进一步处理，所有的处理应该都在API中完成。
 2. API中声明的静态变量若需声明则一定要初始化，否则在调用API时静态变量无初始值，不推荐使用静态，而应该使用对象变量，由调用者赋值。
+
+####Interview Questions
