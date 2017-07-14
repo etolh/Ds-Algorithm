@@ -22,4 +22,9 @@ v1: 89--RandomizedQueues测试用例部分失败，原因是dequeue出队时删�
 
 v2: 96--Permutation部分用例理解错误：Permutation要求是读取标准输入的所有元素，再选出k个元素随机输出
 
-v3：RandomizedQueue的时间空间复杂度：由于不关心顺序，因此删除一个元素时无需进行移动，只需要和最后一个元素替换。bonus:要求Permutation中使用的RandomizedQueues插入的元素不超过k个，需求是必须读取所有的输入，可以StdIn.readAllStrings()读取所有的输入并保存在数组中，使用shuffle生成随机顺序，再读取k个到RandomizedQueues中。
+v3：RandomizedQueue的时间空间复杂度：由于不关心顺序，因此删除一个元素时无需进行移动，只需要和最后一个元素替换。
+
+bonus:要求Permutation中使用的RandomizedQueues插入的元素不超过k个，需求是必须读取所有的输入，
+错误：可以StdIn.readAllStrings()读取所有的输入并保存在数组中，使用shuffle生成随机顺序，再读取k个到RandomizedQueues中。（不能使用数组保存）
+正确：使用ReservoirSampling水塘抽样，使用RandomizedQueues作为蓄水池，用i记读取的字符串数，ReservoirSampling参考ReservoirSampling.md，注意使用序号生成随机数。
+

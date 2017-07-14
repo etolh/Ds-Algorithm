@@ -8,16 +8,25 @@ public class Permutation {
 		RandomizedQueue<String> rq = new RandomizedQueue<String>();
 		int k = Integer.parseInt(args[0]);
 
+		int i = 1;
 		while (!StdIn.isEmpty()) {
 			String s = StdIn.readString();
-			rq.enqueue(s);
-		}
-
-		int i = 0;
-		for (String s : rq) {
-			if (i++ < k) {
-				StdOut.println(s);
+			if (k == 0)
+				break;
+			if (i <= k) {
+				i++;
+				rq.enqueue(s);
+			} else {
+				int p = StdRandom.uniform(i);
+				if (p < k) {
+					rq.dequeue();
+					rq.enqueue(s);
+				}
+				i++;
 			}
 		}
+
+		for (String s : rq)
+			StdOut.println(s);
 	}
 }
