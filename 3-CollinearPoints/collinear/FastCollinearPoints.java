@@ -13,6 +13,7 @@ public class FastCollinearPoints {
 	 * @param points
 	 */
 	public FastCollinearPoints(Point[] points) {
+
 		if (points == null)
 			throw new IllegalArgumentException();
 
@@ -22,20 +23,20 @@ public class FastCollinearPoints {
 			// point is null
 			if (points[i] == null)
 				throw new IllegalArgumentException();
-
-		}
-
-		Arrays.sort(points);
-		for (int i = 0; i < N; i++) {
-			// point is repeat
-			if (i < N - 1) {
-				if (points[i].compareTo(points[i + 1]) == 0)
-					throw new IllegalArgumentException();
-			}
 		}
 
 		num = 0;
 		Point[] auxp = points.clone();
+		Arrays.sort(auxp);
+		
+		for(int i = 0 ; i < N; i++){
+			if(i < N - 1){
+				// 点之间的笔记不能直接笔记，comparaTo方法
+				if (auxp[i].compareTo(auxp[i + 1]) == 0)
+					throw new IllegalArgumentException();
+			}
+		}
+
 
 		for (int i = 0; i < N; i++) {
 
@@ -68,11 +69,10 @@ public class FastCollinearPoints {
 					Arrays.sort(ps);
 					start = ps[0];
 
-					if (start == ref){
+					if (start == ref) {
 						num++;
 						segs.add(new LineSegment(ps[0], ps[n - 1]));
 					}
-
 					j = k - 1;
 				}
 

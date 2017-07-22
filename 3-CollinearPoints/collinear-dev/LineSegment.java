@@ -10,6 +10,7 @@
  *
  *************************************************************************/
 
+package com.exp.f_pa;
 
 public class LineSegment {
     private final Point p;   // one endpoint of this line segment

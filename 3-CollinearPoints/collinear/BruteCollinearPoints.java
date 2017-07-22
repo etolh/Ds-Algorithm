@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
 public class BruteCollinearPoints {
 
 	private int num;
@@ -17,35 +18,36 @@ public class BruteCollinearPoints {
 			throw new IllegalArgumentException();
 
 		int N = points.length;
+
 		for (int i = 0; i < N; i++) {
 			// point is null
 			if (points[i] == null)
 				throw new IllegalArgumentException();
-
 		}
 
-		Arrays.sort(points);
-		for (int i = 0; i < N; i++) {
-			// point is repeat
-			if (i < N - 1) {
-				if (points[i].compareTo(points[i + 1]) == 0)
+		num = 0;
+		Point[] auxp = points.clone();
+		Arrays.sort(auxp);
+
+		for(int i = 0 ; i < N; i++){
+			if(i < N - 1){
+				// 点之间的笔记不能直接笔记，comparaTo方法
+				if (auxp[i].compareTo(auxp[i + 1]) == 0)
 					throw new IllegalArgumentException();
 			}
 		}
 
-		num = 0;
 		arrsegments = new ArrayList<LineSegment>();
 
 		for (int i = 0; i < N; i++)
 			for (int j = i + 1; j < N; j++)
 				for (int k = j + 1; k < N; k++)
 					for (int l = k + 1; l < N; l++) {
-						double slope1 = points[i].slopeTo(points[j]);
-						double slope2 = points[j].slopeTo(points[k]);
-						double slope3 = points[k].slopeTo(points[l]);
+						double slope1 = auxp[i].slopeTo(auxp[j]);
+						double slope2 = auxp[j].slopeTo(auxp[k]);
+						double slope3 = auxp[k].slopeTo(auxp[l]);
 						if (slope1 == slope2 && slope2 == slope3) {
-							arrsegments.add(new LineSegment(points[i],
-									points[l]));
+							arrsegments.add(new LineSegment(auxp[i], auxp[l]));
 							num++;
 						}
 					}

@@ -8,12 +8,13 @@
  *
  ******************************************************************************/
 
+package com.exp.f_pa;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
 
-import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdIn;
 
@@ -75,10 +76,10 @@ public class Point implements Comparable<Point> {
 			else
 				return Double.POSITIVE_INFINITY;
 		}
-		
-		if(this.y == that.y)
+
+		if (this.y == that.y)
 			return 0.0;
-		
+
 		return (double) (that.y - this.y) / (that.x - this.x);
 	}
 
@@ -108,21 +109,21 @@ public class Point implements Comparable<Point> {
 	 * @return the Comparator that defines this ordering on points
 	 */
 	public Comparator<Point> slopeOrder() {
-    	
-    	return new Comparator<Point>() {
+
+		return new Comparator<Point>() {
 
 			public int compare(Point o1, Point o2) {
 				double slope1 = slopeTo(o1);
 				double slope2 = slopeTo(o2);
-				if(slope1 < slope2)
+				if (slope1 < slope2)
 					return -1;
-				else if(slope1 == slope2)
+				else if (slope1 == slope2)
 					return 0;
 				else
 					return 1;
 			}
 		};
-    }
+	}
 
 	/**
 	 * Returns a string representation of this point. This method is provide for
@@ -138,30 +139,31 @@ public class Point implements Comparable<Point> {
 
 	/**
 	 * Unit tests the Point data type.
-	 * @throws FileNotFoundException 
+	 * 
+	 * @throws FileNotFoundException
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
-		
-		System.setIn(new FileInputStream(new File("collinear/input10.txt")));
-		
-		// read the n points from a file
-//	    In in = new In(args[0]);
-	    int n = StdIn.readInt();
-	    Point[] points = new Point[n];
-	    for (int i = 0; i < n; i++) {
-	        int x = StdIn.readInt();
-	        int y = StdIn.readInt();
-	        points[i] = new Point(x, y);
-	    }
 
-	    // draw the points
-	    StdDraw.enableDoubleBuffering();
-	    StdDraw.setPenRadius(.01);
-	    StdDraw.setXscale(0, 32768);
-	    StdDraw.setYscale(0, 32768);
-	    for (Point p : points) {
-	        p.draw();
-	    }
-	    StdDraw.show();
+		System.setIn(new FileInputStream(new File("collinear/input10.txt")));
+
+		// read the n points from a file
+		// In in = new In(args[0]);
+		int n = StdIn.readInt();
+		Point[] points = new Point[n];
+		for (int i = 0; i < n; i++) {
+			int x = StdIn.readInt();
+			int y = StdIn.readInt();
+			points[i] = new Point(x, y);
+		}
+
+		// draw the points
+		StdDraw.enableDoubleBuffering();
+		StdDraw.setPenRadius(.01);
+		StdDraw.setXscale(0, 32768);
+		StdDraw.setYscale(0, 32768);
+		for (Point p : points) {
+			p.draw();
+		}
+		StdDraw.show();
 	}
 }
