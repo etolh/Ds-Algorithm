@@ -1,7 +1,11 @@
 /**
- * ����������4���㼰���ϵ��߶Σ��ȶԵ����򣬴���㿪ʼ����õ㵽�������е��б�ʣ���б������
- * ������3��������ȵ�б�ʣ�����ɸ�б�ʵ��߶Ρ�
+ * 排序求解包含4个点及以上的线段：先对点排序，从起点开始，求该点到其他所有点的斜率，将斜率排序，
+ * 若存在3个以上相等的斜率，即组成该斜率的线段。
+ * 由于每次以一个点为中心，计算其他所有点对其的斜率，当求包含该点的最长线段时，肯定会抱歉前面已经求到的最长线段
+ * 去重复：只有每次所求最长线段的起点为中心点时才将线段加入列表
  */
+
+package com.exp.f_pa;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +19,7 @@ import edu.princeton.cs.algs4.StdOut;
 public class FastCollinearPoints {
 
 	private int num;
-	// private LineSegment[] segments;
+	private LineSegment[] segments;
 	private ArrayList<LineSegment> segs = new ArrayList<LineSegment>();
 
 	/**
@@ -35,17 +39,16 @@ public class FastCollinearPoints {
 
 			Point ref = points[i];
 			Arrays.sort(auxp, 0, N, ref.slopeOrder());
-			
-			// �ж��Ƿ����3��������ref��б����ȵĵ�, j-���
-			for (int j = 1; j < N; j++) {
+
+			// 判断是否存在3个以上与ref的斜率相等的点, 以j为起点，查看是否有相同斜率点，j:1~n-3
+			for (int j = 1; j < N - 2; j++) {
 
 				ArrayList<Point> arr = new ArrayList<Point>();
 				arr.add(ref);
-				arr.add(auxp[j]);
-				
-				Point start = null, end = null;
-				
- 				for (int k = j + 1; k < N; k++) {
+
+				Point start = null;
+
+				for (int k = j; k < N; k++) {
 
 					if (ref.slopeTo(auxp[k]) == ref.slopeTo(auxp[j])) {
 						arr.add(auxp[k]);
@@ -53,14 +56,23 @@ public class FastCollinearPoints {
 					} else {
 
 						if (arr.size() >= 4) {
-							num++;
-							
-							LineSegment line = getLine(arr);
-							segs.add(line);
+							// num++;
 
+							// 由n(n>=4)个点得到最长直线
+							int n = arr.size();
+							Point[] ps = new Point[n];
+							arr.toArray(ps);
+							Arrays.sort(ps);
+							start = ps[0]; // 得到起点
+
+							if (start == ref)
+								// 添加线段只能用arrlist，由于线段数目不定，无法进行初始化
+								segs.add(new LineSegment(ps[0], ps[n - 1]));
 						}
-						
-						j = k;
+
+						// 当下标移至k时此时斜率与起点不一致，j应从k开始计算，前面忽略，
+						// 但注意j后面需要加1，因此设j=k-1
+						j = k - 1;
 						break;
 					}
 				}
@@ -68,16 +80,6 @@ public class FastCollinearPoints {
 			}
 		}
 
-	}
-
-	// ��n(n>=4)����õ��ֱ��
-	private LineSegment getLine(List<Point> arr) {
-
-		int n = arr.size();
-		Point[] ps = new Point[n];
-		arr.toArray(ps);
-		Arrays.sort(ps);
-		return new LineSegment(ps[0], ps[n - 1]);
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class FastCollinearPoints {
 	 */
 	public LineSegment[] segments() {
 		int n = segs.size();
-		LineSegment[] segments = new LineSegment[n];
+		segments = new LineSegment[n];
 		segs.toArray(segments);
 		return segments;
 	}

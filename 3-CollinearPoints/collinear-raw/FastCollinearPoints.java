@@ -1,7 +1,11 @@
 /**
- * æ’åºæ±‚è§£åŒ…å«4ä¸ªç‚¹åŠä»¥ä¸Šçš„çº¿æ®µï¼šå…ˆå¯¹ç‚¹æ’åºï¼Œä»èµ·ç‚¹å¼€å§‹ï¼Œæ±‚è¯¥ç‚¹åˆ°å…¶ä»–æ‰€æœ‰ç‚¹çš„æ–œç‡ï¼Œå°†æ–œç‡æ’åºï¼Œ
- * è‹¥å­˜åœ¨3ä¸ªä»¥ä¸Šç›¸ç­‰çš„æ–œç‡ï¼Œå³ç»„æˆè¯¥æ–œç‡çš„çº¿æ®µã€‚
+ * ÅÅĞòÇó½â°üº¬4¸öµã¼°ÒÔÉÏµÄÏß¶Î£ºÏÈ¶ÔµãÅÅĞò£¬´ÓÆğµã¿ªÊ¼£¬Çó¸Ãµãµ½ÆäËûËùÓĞµãµÄĞ±ÂÊ£¬½«Ğ±ÂÊÅÅĞò£¬
+ * Èô´æÔÚ3¸öÒÔÉÏÏàµÈµÄĞ±ÂÊ£¬¼´×é³É¸ÃĞ±ÂÊµÄÏß¶Î¡£
+ * ÓÉÓÚÃ¿´ÎÒÔÒ»¸öµãÎªÖĞĞÄ£¬¼ÆËãÆäËûËùÓĞµã¶ÔÆäµÄĞ±ÂÊ£¬µ±Çó°üº¬¸ÃµãµÄ×î³¤Ïß¶ÎÊ±£¬¿Ï¶¨»á±§Ç¸Ç°ÃæÒÑ¾­Çóµ½µÄ×î³¤Ïß¶Î
+ * È¥ÖØ¸´£ºÖ»ÓĞÃ¿´ÎËùÇó×î³¤Ïß¶ÎµÄÆğµãÎªÖĞĞÄµãÊ±²Å½«Ïß¶Î¼ÓÈëÁĞ±í
  */
+
+package com.exp.f_pa;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +19,7 @@ import edu.princeton.cs.algs4.StdOut;
 public class FastCollinearPoints {
 
 	private int num;
-	// private LineSegment[] segments;
+	private LineSegment[] segments;
 	private ArrayList<LineSegment> segs = new ArrayList<LineSegment>();
 
 	/**
@@ -35,17 +39,16 @@ public class FastCollinearPoints {
 
 			Point ref = points[i];
 			Arrays.sort(auxp, 0, N, ref.slopeOrder());
-			
-			// åˆ¤æ–­æ˜¯å¦å­˜åœ¨3ä¸ªä»¥ä¸Šä¸refçš„æ–œç‡ç›¸ç­‰çš„ç‚¹, j-èµ·ç‚¹
-			for (int j = 1; j < N; j++) {
+
+			// ÅĞ¶ÏÊÇ·ñ´æÔÚ3¸öÒÔÉÏÓërefµÄĞ±ÂÊÏàµÈµÄµã, ÒÔjÎªÆğµã£¬²é¿´ÊÇ·ñÓĞÏàÍ¬Ğ±ÂÊµã£¬j:1~n-3
+			for (int j = 1; j < N - 2; j++) {
 
 				ArrayList<Point> arr = new ArrayList<Point>();
 				arr.add(ref);
-				arr.add(auxp[j]);
-				
-				Point start = null, end = null;
-				
- 				for (int k = j + 1; k < N; k++) {
+
+				Point start = null;
+
+				for (int k = j; k < N; k++) {
 
 					if (ref.slopeTo(auxp[k]) == ref.slopeTo(auxp[j])) {
 						arr.add(auxp[k]);
@@ -53,14 +56,23 @@ public class FastCollinearPoints {
 					} else {
 
 						if (arr.size() >= 4) {
-							num++;
-							
-							LineSegment line = getLine(arr);
-							segs.add(line);
+							// num++;
 
+							// ÓÉn(n>=4)¸öµãµÃµ½×î³¤Ö±Ïß
+							int n = arr.size();
+							Point[] ps = new Point[n];
+							arr.toArray(ps);
+							Arrays.sort(ps);
+							start = ps[0]; // µÃµ½Æğµã
+
+							if (start == ref)
+								// Ìí¼ÓÏß¶ÎÖ»ÄÜÓÃarrlist£¬ÓÉÓÚÏß¶ÎÊıÄ¿²»¶¨£¬ÎŞ·¨½øĞĞ³õÊ¼»¯
+								segs.add(new LineSegment(ps[0], ps[n - 1]));
 						}
-						
-						j = k;
+
+						// µ±ÏÂ±êÒÆÖÁkÊ±´ËÊ±Ğ±ÂÊÓëÆğµã²»Ò»ÖÂ£¬jÓ¦´Ók¿ªÊ¼¼ÆËã£¬Ç°ÃæºöÂÔ£¬
+						// µ«×¢ÒâjºóÃæĞèÒª¼Ó1£¬Òò´ËÉèj=k-1
+						j = k - 1;
 						break;
 					}
 				}
@@ -68,16 +80,6 @@ public class FastCollinearPoints {
 			}
 		}
 
-	}
-
-	// ç”±n(n>=4)ä¸ªç‚¹å¾—åˆ°æœ€é•¿ç›´çº¿
-	private LineSegment getLine(List<Point> arr) {
-
-		int n = arr.size();
-		Point[] ps = new Point[n];
-		arr.toArray(ps);
-		Arrays.sort(ps);
-		return new LineSegment(ps[0], ps[n - 1]);
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class FastCollinearPoints {
 	 */
 	public LineSegment[] segments() {
 		int n = segs.size();
-		LineSegment[] segments = new LineSegment[n];
+		segments = new LineSegment[n];
 		segs.toArray(segments);
 		return segments;
 	}
