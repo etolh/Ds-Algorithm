@@ -1,5 +1,5 @@
 /**
- * ±©Á¦Çó½âËùÓĞ°üº¬ËÄ¸öµãµÄÏß¶Î
+ * æš´åŠ›æ±‚è§£æ‰€æœ‰åŒ…å«å››ä¸ªç‚¹çš„çº¿æ®µ
  */
 
 package com.exp.f_pa;
@@ -34,14 +34,14 @@ public class BruteCollinearPoints {
 				throw new IllegalArgumentException();
 		}
 
-		// pointsÖ¸ÏòµÄÊı×é¶ÔÏó²»±ä£¬Ê¹ÓÃ¿ËÂ¡Êı×é
+		// pointsæŒ‡å‘çš„æ•°ç»„å¯¹è±¡ä¸å˜ï¼Œä½¿ç”¨å…‹éš†æ•°ç»„
 		num = 0;
 		Point[] auxp = points.clone();
 		Arrays.sort(auxp);
 
 		for (int i = 0; i < N; i++) {
 			if (i < N - 1) {
-				// µãÖ®¼äµÄ±Ê¼Ç²»ÄÜÖ±½Ó±Ê¼Ç£¬comparaTo·½·¨
+				// ç‚¹ä¹‹é—´çš„ç¬”è®°ä¸èƒ½ç›´æ¥ç¬”è®°ï¼ŒcomparaToæ–¹æ³•
 				if (auxp[i].compareTo(auxp[i + 1]) == 0)
 				// if (auxp[i].slopeTo(auxp[i + 1]) == Double.NEGATIVE_INFINITY)
 					throw new IllegalArgumentException();
