@@ -29,11 +29,29 @@ public class FastCollinearPoints {
 	 */
 	public FastCollinearPoints(Point[] points) {
 
+		if (points == null)
+			throw new IllegalArgumentException();
+
 		int N = points.length;
-		num = 0;
-		Point[] auxp = points.clone();
+
+		for (int i = 0; i < N; i++) {
+			// point is null
+			if (points[i] == null)
+				throw new IllegalArgumentException();
+		}
 
 		Arrays.sort(points);
+		for (int i = 0; i < N; i++) {
+			// point is repeat
+			if (i < N - 1) {
+				// 点之间的笔记不能直接笔记，comparaTo方法
+				if (points[i].compareTo(points[i + 1]) == 0)
+					throw new IllegalArgumentException();
+			}
+		}
+
+		num = 0;
+		Point[] auxp = points.clone();
 
 		for (int i = 0; i < N; i++) {
 
@@ -48,33 +66,36 @@ public class FastCollinearPoints {
 
 				Point start = null;
 
-				for (int k = j; k < N; k++) {
+				int k = j;
+				for (; k < N; k++) {
 
 					if (ref.slopeTo(auxp[k]) == ref.slopeTo(auxp[j])) {
 						arr.add(auxp[k]);
 
 					} else {
-
-						if (arr.size() >= 4) {
-							// num++;
-
-							// 由n(n>=4)个点得到最长直线
-							int n = arr.size();
-							Point[] ps = new Point[n];
-							arr.toArray(ps);
-							Arrays.sort(ps);
-							start = ps[0]; // 得到起点
-
-							if (start == ref)
-								// 添加线段只能用arrlist，由于线段数目不定，无法进行初始化
-								segs.add(new LineSegment(ps[0], ps[n - 1]));
-						}
-
-						// 当下标移至k时此时斜率与起点不一致，j应从k开始计算，前面忽略，
-						// 但注意j后面需要加1，因此设j=k-1
-						j = k - 1;
 						break;
 					}
+				}
+
+				// 统计完一个起点的所有相同斜率点，综合判断，
+				// 不能放里面，放里面时当处理垂直线段时，执行到最后一个点直接跳出循环，垂直线段将不会添加进去
+				if (arr.size() >= 4) {
+
+					// 由n(n>=4)个点得到最长直线
+					int n = arr.size();
+					Point[] ps = new Point[n];
+					arr.toArray(ps);
+					Arrays.sort(ps);
+					start = ps[0]; // 得到起点
+
+					if (start == ref) {
+						num++; // num与添加新线段同步
+						// 添加线段只能用arrlist，由于线段数目不定，无法进行初始化
+						segs.add(new LineSegment(ps[0], ps[n - 1]));
+					}
+					// 当下标移至k时此时斜率与起点不一致，重新更换起点j，且j应从k开始计算，前面已计算的忽略
+					// 但注意j后面需要加1，因此设j=k-1，同样避免到末尾直接跳出的情况
+					j = k - 1;
 				}
 
 			}
