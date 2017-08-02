@@ -3,21 +3,43 @@ import java.util.Comparator;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
-	private int moves;
-	private Queue<Board> rs;
+	private Stack<Board> rs;
 	private int flag = 0;
+	private Comparator<Node> comp = new ManPrio();
 
-	private class comp implements Comparator<Board> {
+	private class ManPrio implements Comparator<Node> {
 
-		public int compare(Board o1, Board o2) {
-			return o1.manhattan() - o2.manhattan();
+		@Override
+		public int compare(Node o1, Node o2) {
+
+			int m1 = o1.board.manhattan();
+			int m2 = o2.board.manhattan();
+			
+			int f1 = o1.moves + m1;
+			int f2 = o2.moves + m2;
+			if(f1 == f2)
+				return m1 - m2;
+			return f1 - f2;
 		}
+	}
 
+	private class Node {
+
+		Board board;
+		Node pre;
+		int moves;
+
+		public Node(Board board, Node pre, int moves) {
+			super();
+			this.board = board;
+			this.pre = pre;
+			this.moves = moves;
+		}
 	}
 
 	/**
@@ -25,63 +47,59 @@ public class Solver {
 	 * 
 	 * @param initial
 	 */
-	public Solver(Board initial) {
+public Solver(Board initial) {
+		
+		if(initial == null)
+			throw new IllegalArgumentException();
+		
+		MinPQ<Node> minpq = new MinPQ<Node>(comp);
+		minpq.insert(new Node(initial, null, flag));
 
-		this.moves = 0;
-		rs = new Queue<Board>();
-		Board twin = initial.twin();
+		MinPQ<Node> twinpq = new MinPQ<Node>(comp);
+		twinpq.insert(new Node(initial.twin(), null, flag));
 
-		MinPQ<Board> minpq = new MinPQ<Board>(new comp());
-		Board pre = null;
-		minpq.insert(initial);
-
-		MinPQ<Board> twinpq = new MinPQ<Board>(new comp());
-		Board tpre = null;
-		twinpq.insert(twin);
-
-		while (!minpq.isEmpty()) {
+		while (!minpq.min().board.isGoal() && !twinpq.min().board.isGoal()) {
 			
-			Board searchnode = minpq.delMin();
-			rs.enqueue(searchnode);
+			Node sn = minpq.delMin();
+			Node tsn = twinpq.delMin();
 
-			Board twinsr = twinpq.delMin();
-
-			
-			if (searchnode.isGoal())
-				break;
-
-			
-			if (twinsr.isGoal()) {
-				flag = 1;
-				break;
+			for (Board b : sn.board.neighbors()) {
+				if (sn.pre != null && b.equals(sn.pre.board))
+					continue;
+				minpq.insert(new Node(b, sn, sn.moves + 1));
 			}
 
-			
-			for (Board n : searchnode.neighbors()) {
-				if (n != pre) {
-					minpq.insert(n);
-				}
+			for (Board b : tsn.board.neighbors()) {
+				if (tsn.pre != null && tsn.pre.board.equals(b))
+					continue;
+				twinpq.insert(new Node(b, tsn, tsn.moves + 1));
 			}
-
-			for (Board n : twinsr.neighbors()) {
-				if (n != tpre) {
-					twinpq.insert(n);
-				}
-			}
-
-			pre = searchnode;
-			tpre = twinsr;
-			moves++;
 		}
+		
+		if(minpq.min().board.isGoal()){
+		
+			rs = new Stack<Board>();
+			Node goal = minpq.min();
+			flag = goal.moves;
+			
+			while (goal.board != initial) {
+				rs.push(goal.board);
+				goal = goal.pre;
+			}
+			rs.push(initial);
+		}else{
+			flag = -1;
+		}
+		
 	}
 
 	/**
-	 * is the initial board solvable
+	 * is the initial board solvable?
 	 * 
 	 * @return
 	 */
 	public boolean isSolvable() {
-		return flag == 0;
+		return flag != -1;
 	}
 
 	/**
@@ -90,7 +108,7 @@ public class Solver {
 	 * @return
 	 */
 	public int moves() {
-		return moves;
+		return flag;
 	}
 
 	/**
@@ -99,6 +117,8 @@ public class Solver {
 	 * @return
 	 */
 	public Iterable<Board> solution() {
+		if (!isSolvable())
+			return null;
 		return rs;
 	}
 

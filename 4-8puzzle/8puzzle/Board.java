@@ -1,4 +1,5 @@
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
@@ -14,8 +15,12 @@ public class Board {
 	 * @param blocks
 	 */
 	public Board(int[][] blocks) {
-		this.blocks = blocks;
 		this.n = blocks[0].length;
+		this.blocks = new int[n][n];
+
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++)
+				this.blocks[i][j] = blocks[i][j];
 	}
 
 	/**
@@ -57,14 +62,15 @@ public class Board {
 
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++) {
-				int num = i * n + j + 1;
+
 				int gnum = blocks[i][j];
 
 				if (gnum != 0) {
-					int dis = num - gnum;
-					if (dis < 0)
-						dis = -dis;
-					man += (dis / n + dis % n);
+					int gi = (gnum - 1) / n;
+					int gj = (gnum - 1) % n;
+					int disi = (gi - i > 0) ? (gi - i) : -(gi - i);
+					int disj = (gj - j > 0) ? (gj - j) : -(gj - j);
+					man += (disi + disj);
 				}
 			}
 		return man;
@@ -158,7 +164,6 @@ public class Board {
 	public Iterable<Board> neighbors() {
 		Stack<Board> sb = new Stack<Board>();
 
-		// 找到空格子
 		int bi = 0, bj = 0;
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++) {
@@ -170,7 +175,6 @@ public class Board {
 
 		// up
 		if (bi > 0) {
-			// 互换
 			int[][] newblocks = newClone();
 			exch(newblocks, bi, bj, bi - 1, bj);
 			sb.push(new Board(newblocks));
@@ -200,14 +204,12 @@ public class Board {
 		return sb;
 	}
 
-	// 交换数组格子
 	private void exch(int[][] exblocks, int si, int sj, int ti, int tj) {
 		int temp = exblocks[si][sj];
 		exblocks[si][sj] = exblocks[ti][tj];
 		exblocks[ti][tj] = temp;
 	}
 
-	// 深层克隆数组
 	private int[][] newClone() {
 		int[][] newb = new int[n][n];
 		for (int i = 0; i < n; i++)
