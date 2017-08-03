@@ -3,10 +3,12 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
+
 public class Board {
 
-	private int[][] blocks;
+	private char[] titles;
 	private int n;
+	private int ham, man;
 
 	/**
 	 * construct a board from an n-by-n array of blocks (where blocks[i][j] =
@@ -16,11 +18,22 @@ public class Board {
 	 */
 	public Board(int[][] blocks) {
 		this.n = blocks[0].length;
-		this.blocks = new int[n][n];
+		this.titles = new char[n * n + 1];
 
 		for (int i = 0; i < n; i++)
-			for (int j = 0; j < n; j++)
-				this.blocks[i][j] = blocks[i][j];
+			for (int j = 0; j < n; j++) {
+				int num = i * n + j + 1;
+				this.titles[num] = (char) blocks[i][j];
+			}
+		this.ham = callHam(titles);
+		this.man = callMan(titles);
+	}
+
+	private Board(char[] titles, int n, int ham, int man) {
+		this.titles = titles;
+		this.n = n;
+		this.ham = ham;
+		this.man = man;
 	}
 
 	/**
@@ -38,17 +51,6 @@ public class Board {
 	 * @return
 	 */
 	public int hamming() {
-		int ham = 0;
-
-		for (int i = 0; i < n; i++)
-			for (int j = 0; j < n; j++) {
-				int num = i * n + j + 1;
-				if (num == n * n)
-					break;
-				if (blocks[i][j] != num)
-					ham++;
-			}
-
 		return ham;
 	}
 
@@ -58,21 +60,6 @@ public class Board {
 	 * @return
 	 */
 	public int manhattan() {
-		int man = 0;
-
-		for (int i = 0; i < n; i++)
-			for (int j = 0; j < n; j++) {
-
-				int gnum = blocks[i][j];
-
-				if (gnum != 0) {
-					int gi = (gnum - 1) / n;
-					int gj = (gnum - 1) % n;
-					int disi = (gi - i > 0) ? (gi - i) : -(gi - i);
-					int disj = (gj - j > 0) ? (gj - j) : -(gj - j);
-					man += (disi + disj);
-				}
-			}
 		return man;
 	}
 
@@ -87,7 +74,7 @@ public class Board {
 			for (int j = 0; j < n; j++) {
 				int num = i * n + j + 1;
 				if (num != n * n) {
-					if (num != blocks[i][j])
+					if (num != (int) titles[num])
 						return false;
 				}
 			}
@@ -102,29 +89,27 @@ public class Board {
 	 */
 	public Board twin() {
 
-		int[][] twinBlocks = newClone();
-
+		char[] twinBlocks = titles.clone();
 		int i = 0, j = 0;
 
 		while (true) {
 
+			int num = i * n + j + 1;
 			if (j < n - 1) {
-
-				if (twinBlocks[i][j] != 0 && twinBlocks[i][j + 1] != 0) {
-					exch(twinBlocks, i, j, i, j + 1);
+				if (twinBlocks[num] != 0 && twinBlocks[num + 1] != 0) {
+					exch(twinBlocks, num, num + 1);
 					break;
 				}
-
 			} else if (j == n - 1) {
 				i++;
 				j = 0;
 				continue;
 			}
-
 			j++;
 		}
 
-		return new Board(twinBlocks);
+		return new Board(twinBlocks, n, callHam(twinBlocks),
+				callMan(twinBlocks));
 	}
 
 	/**
@@ -141,7 +126,7 @@ public class Board {
 			return false;
 
 		Board yb = (Board) y;
-		int[][] yblocks = yb.blocks;
+		char[] yblocks = yb.titles;
 		int yn = yb.dimension();
 
 		if (yn != n)
@@ -149,7 +134,8 @@ public class Board {
 
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++) {
-				if (blocks[i][j] != yblocks[i][j])
+				int num = i * n + j + 1;
+				if (titles[num] != yblocks[num])
 					return false;
 			}
 
@@ -161,62 +147,108 @@ public class Board {
 	 * 
 	 * @return
 	 */
+	
 	public Iterable<Board> neighbors() {
 		Stack<Board> sb = new Stack<Board>();
 
 		int bi = 0, bj = 0;
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++) {
-				if (blocks[i][j] == 0) {
+				int bnum = i * n + j + 1;
+				if ((int) titles[bnum] == 0) {
 					bi = i;
 					bj = j;
 				}
 			}
-
+		
+		int num = bi * n + bj + 1;
 		// up
 		if (bi > 0) {
-			int[][] newblocks = newClone();
-			exch(newblocks, bi, bj, bi - 1, bj);
-			sb.push(new Board(newblocks));
+			char[] newblocks = titles.clone();
+			exch(newblocks, num, num - n);
+			sb.push(new Board(newblocks, n, callHam(newblocks),
+					man + callSinMan(newblocks[num], bi, bj) 
+					- callSinMan(titles[num - n], bi - 1, bj)));
 		}
 
 		// down
 		if (bi < n - 1) {
-			int[][] newblocks = newClone();
-			exch(newblocks, bi, bj, bi + 1, bj);
-			sb.push(new Board(newblocks));
+			char[] newblocks = titles.clone();
+			exch(newblocks, num, num + n);
+			sb.push(new Board(newblocks, n, callHam(newblocks),
+					man + callSinMan(newblocks[num], bi, bj) 
+					- callSinMan(titles[num + n], bi + 1, bj)));
 		}
 
 		// left
 		if (bj > 0) {
-			int[][] newblocks = newClone();
-			exch(newblocks, bi, bj, bi, bj - 1);
-			sb.push(new Board(newblocks));
+			char[] newblocks = titles.clone();
+			exch(newblocks, num, num - 1);
+			sb.push(new Board(newblocks, n, callHam(newblocks),
+					man + callSinMan(newblocks[num], bi, bj) 
+					- callSinMan(titles[num - 1], bi, bj - 1)));
 		}
 
 		// right
 		if (bj < n - 1) {
-			int[][] newblocks = newClone();
-			exch(newblocks, bi, bj, bi, bj + 1);
-			sb.push(new Board(newblocks));
+			char[] newblocks = titles.clone();
+			exch(newblocks, num, num + 1);
+			sb.push(new Board(newblocks, n, callHam(newblocks),
+					man + callSinMan(newblocks[num], bi, bj) 
+					- callSinMan(titles[num + 1], bi, bj + 1)));
 		}
 
 		return sb;
 	}
 
-	private void exch(int[][] exblocks, int si, int sj, int ti, int tj) {
-		int temp = exblocks[si][sj];
-		exblocks[si][sj] = exblocks[ti][tj];
-		exblocks[ti][tj] = temp;
+
+	private void exch(char[] exblocks, int i, int j) {
+		char temp = exblocks[i];
+		exblocks[i] = exblocks[j];
+		exblocks[j] = temp;
 	}
 
-	private int[][] newClone() {
-		int[][] newb = new int[n][n];
-		for (int i = 0; i < n; i++)
-			for (int j = 0; j < n; j++)
-				newb[i][j] = blocks[i][j];
+	private int callHam(char[] titles) {
 
-		return newb;
+		int ham = 0;
+
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++) {
+				int num = i * n + j + 1;
+				if (num == n * n)
+					break;
+				if ((int) titles[num] != num)
+					ham++;
+			}
+
+		return ham;
+	}
+	
+	private int callMan(char[] titles) {
+
+		int man = 0;
+
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++) {
+
+				int num = i * n + j + 1;
+				int gnum = titles[num];
+
+				if (gnum != 0) {
+					man += callSinMan(gnum, i, j);
+				}
+			}
+		return man;
+	}
+	
+	private int callSinMan(int gnum, int i, int j){
+		
+		int gi = (gnum - 1) / n;
+		int gj = (gnum - 1) % n;
+		int disi = (gi - i > 0) ? (gi - i) : -(gi - i);
+		int disj = (gj - j > 0) ? (gj - j) : -(gj - j);
+		
+		return (disi + disj);
 	}
 
 	/**
@@ -231,10 +263,11 @@ public class Board {
 
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++)
-				sb.append(String.format(" %2d", blocks[i][j]));
+				sb.append(String.format(" %2d", (int)titles[i * n + j + 1]));
 			sb.append("\n");
 		}
 
 		return sb.toString();
 	}
+
 }

@@ -17,14 +17,16 @@ public class Solver {
 		@Override
 		public int compare(Node o1, Node o2) {
 
-			int m1 = o1.board.manhattan();
-			int m2 = o2.board.manhattan();
+			int p1 = o1.priority;
+			int p2 = o2.priority;
 			
-			int f1 = o1.moves + m1;
-			int f2 = o2.moves + m2;
-			if(f1 == f2)
-				return m1 - m2;
-			return f1 - f2;
+			if(p1 < p2)
+				return -1;
+			else if(p1 == p2)
+				return 0;
+			else
+				return 1;
+			
 		}
 	}
 
@@ -33,12 +35,13 @@ public class Solver {
 		Board board;
 		Node pre;
 		int moves;
-
+		int priority;
+		
 		public Node(Board board, Node pre, int moves) {
-			super();
 			this.board = board;
 			this.pre = pre;
 			this.moves = moves;
+			this.priority = board.manhattan() + moves;
 		}
 	}
 
