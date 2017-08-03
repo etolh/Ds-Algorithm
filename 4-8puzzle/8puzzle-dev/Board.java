@@ -4,12 +4,19 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
+/**
+ * 包含n*n个格子的网板
+ * 
+ * @author 胡亮
+ *
+ */
+
 public class Board {
 
-	private char[] titles;
-	private int n;
+	private char[] titles; // blocks存储每个块目标位置
+	private int n; // 维度
 	private int ham, man;
-	private int zero;
+	private int zero; // 空白点所在位置（一维数组）
 
 	/**
 	 * construct a board from an n-by-n array of blocks (where blocks[i][j] =
@@ -50,7 +57,7 @@ public class Board {
 	}
 
 	/**
-	 * number of blocks out of place num
+	 * number of blocks out of place num: 当前所在的位置 blocks[i][j]:目标位置
 	 * 
 	 * @return
 	 */
@@ -146,12 +153,19 @@ public class Board {
 		return true;
 	}
 
-	
+	/**
+	 * 返回与空白位置zero交换位置为pos处的邻接结点
+	 * 
+	 * @param i
+	 * @param j
+	 * @return
+	 */
 	private Board neignbor(int pos) {
 
 		char[] newblocks = titles.clone();
 		exch(newblocks, zero, pos);
 
+		// 交换后pos位置为空白
 		return new Board(newblocks, pos, callHam(newblocks), man
 				+ callSinMan(newblocks[zero], zero)
 				- callSinMan(titles[pos], pos));
@@ -171,6 +185,7 @@ public class Board {
 		int num = zero;
 		// up
 		if (bi > 0) {
+			// 互换
 			sb.push(neignbor(num - n));
 		}
 
@@ -192,6 +207,7 @@ public class Board {
 		return sb;
 	}
 
+	// 交换数组格子
 	private void exch(char[] exblocks, int i, int j) {
 		char temp = exblocks[i];
 		exblocks[i] = exblocks[j];
@@ -214,6 +230,14 @@ public class Board {
 		return ham;
 	}
 	
+	/**
+	 * 求一维数组当前位置pos(i, j)的曼哈顿距离
+	 * 
+	 * @param gnum
+	 * @param i
+	 * @param j
+	 * @return
+	 */
 	private int callSinMan(int gnum, int pos) {
 		
 		int gi = (gnum - 1) / n;
@@ -226,6 +250,12 @@ public class Board {
 		return (disi + disj);
 	}
 
+	/**
+	 * 求整个数组的曼哈顿距离
+	 * 
+	 * @param titles
+	 * @return
+	 */
 	private int callMan(char[] titles) {
 
 		int man = 0;
