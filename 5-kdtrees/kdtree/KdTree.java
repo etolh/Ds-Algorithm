@@ -7,6 +7,8 @@ public class KdTree {
 
 	private int n;
 	private Node root;
+	private Point2D nearp;
+	private double neardis;
 
 	private static class Node {
 		private Point2D p;
@@ -37,53 +39,55 @@ public class KdTree {
 	public void insert(Point2D p) {
 		if (p == null)
 			throw new IllegalArgumentException();
-		if(contains(p))	return;
-		double xmin = 0.0, ymin = 0.0, xmax = 1.0, ymax = 1.0;
-		RectHV rect = new RectHV(xmin, ymin, xmax, ymax);
-		root = insert(root, p, rect, 1);
-		n++;
+		root = insert(root, p, null, 1);
 	}
 
-	private Node insert(Node h, Point2D p, RectHV rect, int layer) {
+	private Node insert(Node h, Point2D p, Node pre, int layer) {
 
-		if (h == null)
+		if (h == null) {
+			n++;
+			if (pre == null)
+				return new Node(p, new RectHV(0.0, 0.0, 1.0, 1.0));
+
+			RectHV rect = null;
+			if ((layer - 1) % 2 == 1) {
+				int cmp = dto(p.x(), pre.p.x());
+				if (cmp < 0)
+					// left
+					rect = new RectHV(pre.rect.xmin(), pre.rect.ymin(),
+							pre.p.x(), pre.rect.ymax());
+				else
+					rect = new RectHV(pre.p.x(), pre.rect.ymin(),
+							pre.rect.xmax(), pre.rect.ymax());
+			} else {
+
+				int cmp = dto(p.y(), pre.p.y());
+				if (cmp < 0)
+					// down
+					rect = new RectHV(pre.rect.xmin(), pre.rect.ymin(),
+							pre.rect.xmax(), pre.p.y());
+				else
+					rect = new RectHV(pre.rect.xmin(), pre.p.y(),
+							pre.rect.xmax(), pre.rect.ymax());
+			}
 			return new Node(p, rect);
+		}
 
-		double xmin, ymin, xmax, ymax;
+		if (h.p.equals(p))
+			return h;
 		if (layer % 2 == 1) {
 			int cmp = dto(p.x(), h.p.x());
 			if (cmp < 0) {
-				xmin = h.rect.xmin();
-				ymin = h.rect.ymin();
-				xmax = h.p.x();
-				ymax = h.rect.ymax();
-				rect = new RectHV(xmin, ymin, xmax, ymax);
-				h.left = insert(h.left, p, rect, layer + 1);
+				h.left = insert(h.left, p, h, layer + 1);
 			} else {
-				xmin = h.p.x();
-				ymin = h.rect.ymin();
-				xmax = h.rect.xmax();
-				ymax = h.rect.ymax();
-				rect = new RectHV(xmin, ymin, xmax, ymax);
-				h.right = insert(h.right, p, rect, layer + 1);
+				h.right = insert(h.right, p, h, layer + 1);
 			}
 		} else {
 			int cmp = dto(p.y(), h.p.y());
 			if (cmp < 0) {
-				xmin = h.rect.xmin();
-				ymin = h.rect.ymin();
-				xmax = h.rect.xmax();
-				ymax = h.p.y();
-				rect = new RectHV(xmin, ymin, xmax, ymax);
-				h.left = insert(h.left, p, rect, layer + 1);
-
+				h.left = insert(h.left, p, h, layer + 1);
 			} else {
-				xmin = h.rect.xmin();
-				ymin = h.p.y();
-				xmax = h.rect.xmax();
-				ymax = h.rect.ymax();
-				rect = new RectHV(xmin, ymin, xmax, ymax);
-				h.right = insert(h.right, p, rect, layer + 1);
+				h.right = insert(h.right, p, h, layer + 1);
 			}
 		}
 		return h;
@@ -100,21 +104,16 @@ public class KdTree {
 
 		if (h == null)
 			return false;
-		int flag = Integer.MAX_VALUE;
+
 		int cmp = 0;
 		if (layer % 2 == 1) {
 			cmp = dto(p.x(), h.p.x());
-			if (cmp == 0)
-				flag = dto(p.y(), h.p.y());
 		} else {
 			cmp = dto(p.y(), h.p.y());
-			if (cmp == 0)
-				flag = dto(p.x(), h.p.x());
 		}
 
-		if (cmp == 0 && flag == 0)
+		if (cmp == 0 && h.p.equals(p))
 			return true;
-
 		if (cmp < 0)
 			return contains(h.left, p, layer + 1);
 		else
@@ -184,26 +183,38 @@ public class KdTree {
 
 		if (root == null)
 			return null;
-		Queue<Point2D> q = new Queue<Point2D>();
-		Point2D minp = root.p;
-		q.enqueue(minp);
-		nearest(p, q, root);
-		return q.dequeue();
+		neardis = Double.POSITIVE_INFINITY;
+		nearest(p, root, 1);
+		return nearp;
 	}
 
-	private void nearest(Point2D p, Queue<Point2D> q, Node x) {
+private void nearest(Point2D p, Node x, int layer) {
 
 		if (x == null)
 			return;
+
 		double dis = x.p.distanceSquaredTo(p);
-		double mindis = q.peek().distanceSquaredTo(p);
-		if (dis < mindis) {
-			q.dequeue();
-			q.enqueue(x.p);
+		if (dis < neardis) {
+			nearp = x.p;
+			neardis = dis;
 		}
-		if (x.left != null && x.left.rect.distanceSquaredTo(p) < mindis)
-			nearest(p, q, x.left);
-		if (x.right != null && x.right.rect.distanceSquaredTo(p) < mindis)
-			nearest(p, q, x.right);
+
+		int cmp;
+		if (layer % 2 == 1) {
+			cmp = dto(p.x(), x.p.x());
+		} else {
+			cmp = dto(p.y(), x.p.y());
+		}
+
+		if (cmp < 0) {
+			nearest(p, x.left, layer + 1);
+			if (x.right != null && x.right.rect.distanceSquaredTo(p) < neardis)
+				nearest(p, x.right, layer + 1);
+		} else {
+			nearest(p, x.right, layer + 1);
+			if (x.left != null && x.left.rect.distanceSquaredTo(p) < neardis)
+				nearest(p, x.left, layer + 1);
+		}
 	}
+
 }
