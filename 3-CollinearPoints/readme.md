@@ -1,15 +1,15 @@
-###Programming Assignment 3: Collinear Points
+### Programming Assignment 3: Collinear Points
 空间上有n个不重复的点，求出所有包含4个点以上的线段（线段用起点到终点表示），要求不能包含重复线段，如p->q->s->->t->r，则可以返回p->r或r->p，但不能包含q->r等。
 Point点类型和LineSegment类型已给出部分，要求完成BruteCollinearPoints暴力求解和
 FastCollinearPoints快速求解两种方式。
 
-####Point部分
+#### Point部分
 1. 在给出的Point中要求完成部分功能：实现Comparable接口的ComparableTo方法（y优先，再比较x）, 返回一个点到该点的斜率和一个根据斜率进行排序的比较器。
 
-####BruteCollinearPoints部分
+#### BruteCollinearPoints部分
 1. 暴力求解中只要求求出只有4个点的所有线段，同时为了确定4个点的线段的起点和终点，首先要对点集合Points按自然顺序排序，再循环遍历取出里面的4个点，若彼此斜率相等，则起点即为第一个点，终点即为最后一个点，加入到线段集合。
 
-####FastCollinearPoints部分
+#### FastCollinearPoints部分
 1. 快递求解的主要思想是：对于其中任意一个点ref，求它到其他所有点的斜率，根据斜率排序，斜率中若存在3个以上相等的斜率则加上ref为4点以上的线段。
 
 2. 具体实现：
@@ -18,9 +18,9 @@ FastCollinearPoints快速求解两种方式。
     3. 去重：由于对于所有点都要做对其他点的斜率排序，并选取其中斜率相等点构造线段，后面构造的线段前面可能已经构造，为避免重复，不能用hashCode：注意一条线段的起点和终点一定，因此在构造线段时判断只有当前构造线段的起点为斜率的参考点ref时才添加，由于ref对所有点遍历一遍，因此一定会包含所有线段，且不会重复
 
 
-####注意
+#### 注意
 1. 注意处理异常情况，且传入构造函数的点数组Points为不变对象，因此在起始时要对其进行克隆，对克隆数组进行排序操作，原数组只做参考。
 
 
-####未完
+#### ToBeDo
 1. timing：comparaTo方法使用超时
